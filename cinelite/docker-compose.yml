@@ -1,0 +1,72 @@
+version: "3.9"
+
+services:
+  # ---------- Datastores ----------
+  postgres:
+    image: postgres:16-alpine
+    container_name: pg
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  cassandra:
+    image: cassandra:4.1
+    container_name: cassandra
+    environment:
+      CASSANDRA_CLUSTER_NAME: ${CASSANDRA_CLUSTER_NAME}
+      MAX_HEAP_SIZE: 512M
+      HEAP_NEWSIZE: 128M
+    ports: ["9042:9042"]
+    volumes:
+      - cassdata:/var/lib/cassandra
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports: ["9000:9000", "9001:9001"]
+    volumes:
+      - miniodata:/data
+
+  # ---------- Stub "health" services (return 200 now; replace later) ----------
+  api-gateway:
+    image: hashicorp/http-echo:0.2.3
+    command: ["-text=api-gateway OK"]
+    ports: ["8080:5678"]
+
+  auth-service:
+    image: hashicorp/http-echo:0.2.3
+    command: ["-text=auth-service OK"]
+    ports: ["8081:5678"]
+
+  movie-service:
+    image: hashicorp/http-echo:0.2.3
+    command: ["-text=movie-service OK"]
+    ports: ["8082:5678"]
+
+  profile-service:
+    image: hashicorp/http-echo:0.2.3
+    command: ["-text=profile-service OK"]
+    ports: ["8083:5678"]
+
+  pricing-service:
+    image: hashicorp/http-echo:0.2.3
+    command: ["-text=pricing-service OK"]
+    ports: ["8084:5678"]
+
+  media-service:
+    image: hashicorp/http-echo:0.2.3
+    command: ["-text=media-service OK"]
+    ports: ["8085:5678"]
+
+volumes:
+  pgdata:
+  cassdata:
+  miniodata:
